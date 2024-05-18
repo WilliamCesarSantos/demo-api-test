@@ -26,7 +26,7 @@ public class CustomerStepDefinition {
 
     }
 
-    @Then("erro no cadastro")
+    @Then("erro no cadastro {int}")
     public void errorOnRegister(Integer status) {
         System.out.println(status);
     }

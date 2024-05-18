@@ -7,4 +7,4 @@ Feature: Cadastro de cliente
   Scenario: Cadastrar cliente sem nome
     Given cliente não esta presente na base
     When cadastro o cliente sem informar o nome
-    Then erro no cadastro
+    Then erro no cadastro 400
