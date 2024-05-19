@@ -6,6 +6,7 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -29,7 +30,7 @@ public class CustomerStepDefinition {
         customer = new CustomerDto();
         customer.setDocument("100");
         customer.setName(RandomStringUtils.randomAlphabetic(20));
-//        customer.setBirthDate(LocalDate.now());
+        customer.setBirthDate(LocalDate.now());
         customer.setTelephone(List.of("111111111"));
         customer.setEmail(List.of("api@test.com"));
     }
@@ -63,7 +64,7 @@ public class CustomerStepDefinition {
     public void searchCustomer() {
         var response = request.when().get("/customers?name="+customer.getName());
         response.then().statusCode(200);
-        var name = response.jsonPath().get("$.[0].name");
+        var name = response.jsonPath().get("[0].name");
         Assertions.assertEquals(customer.getName(), name);
     }
 
