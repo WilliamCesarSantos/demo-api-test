@@ -25,19 +25,29 @@ public class CustomerStepDefinition {
     private Response response = null;
     private CustomerDto customer = null;
 
-    @Given("cliente não esta presente na base")
-    public void customerNotExist() {
+    @Given("cliente com documento igual a {string} e não cadastrado")
+    public void customerNotExist(String document) {
         customer = new CustomerDto();
-        customer.setDocument("100");
+        customer.setDocument(document);
         customer.setName(RandomStringUtils.randomAlphabetic(20));
         customer.setBirthDate(LocalDate.now());
         customer.setTelephone(List.of("111111111"));
         customer.setEmail(List.of("api@test.com"));
     }
 
-    @Given("cliente já existiver cadastrado")
+    @Given("cliente já estiver cadastrado")
     public void registerNewCustomer() {
+        customer = new CustomerDto();
+        customer.setDocument(RandomStringUtils.randomNumeric(11));
+        customer.setName(RandomStringUtils.randomAlphabetic(20));
+        customer.setBirthDate(LocalDate.now());
+        customer.setTelephone(List.of("111111111"));
+        customer.setEmail(List.of("api@test.com"));
+        response = request.body(customer).when().post("/customers");
 
+        response.then().statusCode(201);
+        var id = response.jsonPath().getLong("id");
+        customer.setId(id);
     }
 
     @When("cadastro o cliente")
@@ -47,7 +57,12 @@ public class CustomerStepDefinition {
 
     @When("cadastro o cliente sem informar o nome")
     public void registerCustomerWithoutName() {
-
+        customer = new CustomerDto();
+        customer.setDocument(RandomStringUtils.randomNumeric(11));
+        customer.setBirthDate(LocalDate.now());
+        customer.setTelephone(List.of("111111111"));
+        customer.setEmail(List.of("api@test.com"));
+        response = request.body(customer).when().post("/customers");
     }
 
     @When("cadastro o cliente sem informar o document")
