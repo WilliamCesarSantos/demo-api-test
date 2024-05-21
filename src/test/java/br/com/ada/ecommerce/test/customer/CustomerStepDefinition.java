@@ -1,29 +1,21 @@
 package br.com.ada.ecommerce.test.customer;
 
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.path.json.config.JsonPathConfig;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.http.HttpHeaders;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public class CustomerStepDefinition {
 
-    private RequestSpecification request = RestAssured.given()
-            .baseUri("http://localhost:8080")
-            .contentType(ContentType.JSON);
-    private Response response = null;
     private CustomerDto customer = null;
+    protected RequestSpecification request;
+    protected Response response;
 
     @Given("cliente com documento igual a {string} e não cadastrado")
     public void customerNotExist(String document) {
@@ -77,7 +69,7 @@ public class CustomerStepDefinition {
 
     @Then("encontro o cliente cadastrado")
     public void searchCustomer() {
-        var response = request.when().get("/customers?name="+customer.getName());
+        var response = request.when().get("/customers?name=" + customer.getName());
         response.then().statusCode(200);
         var name = response.jsonPath().get("[0].name");
         Assertions.assertEquals(customer.getName(), name);
@@ -91,11 +83,6 @@ public class CustomerStepDefinition {
     @Then("deve retornar o cliente dentro da lista")
     public void checkIfCustomerIsPresent() {
 
-    }
-
-    @And("a requisição deve ter status igual a {int}")
-    public void checkStatusInResponse(Integer status) {
-        response.then().statusCode(status);
     }
 
 }
