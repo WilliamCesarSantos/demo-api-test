@@ -2,8 +2,8 @@ Feature: Cliente
   Scenario: Cadastrar com sucesso
     Given cliente com documento igual a "100" e não cadastrado
     When cadastro o cliente
+    And response should status equals 201
     Then encontro o cliente cadastrado
-    And a requisição deve ter status igual a 201
 
   Scenario: Cadastrar cliente sem nome
     Given cliente com documento igual a "100" e não cadastrado

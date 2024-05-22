@@ -1,13 +1,10 @@
 package br.com.ada.ecommerce.test.customer;
 
+import br.com.ada.ecommerce.test.http.HttpSession;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.Assertions;
 
@@ -17,35 +14,29 @@ import java.util.List;
 public class CustomerStepDefinition {
 
     private CustomerDto customer = null;
-    protected RequestSpecification request;
-    protected Response response;
+    private HttpSession httpSession;
 
-    public CustomerStepDefinition() {
-        request = RestAssured.given()
-                .baseUri("http://localhost:8080")
-                .contentType(ContentType.JSON);
-    }
+    public CustomerStepDefinition(HttpSession httpSession) {
+        this.httpSession = httpSession;
 
-    @Given("cliente com documento igual a {string} e não cadastrado")
-    public void customerNotExist(String document) {
-        customer = new CustomerDto();
-        customer.setDocument(document);
-        customer.setName(RandomStringUtils.randomAlphabetic(20));
-        customer.setBirthDate(LocalDate.now());
-        customer.setTelephone(List.of("111111111"));
-        customer.setEmail(List.of("api@test.com"));
-    }
-
-    @Given("cliente já estiver cadastrado")
-    public void registerNewCustomer() {
         customer = new CustomerDto();
         customer.setDocument(RandomStringUtils.randomNumeric(11));
         customer.setName(RandomStringUtils.randomAlphabetic(20));
         customer.setBirthDate(LocalDate.now());
         customer.setTelephone(List.of("111111111"));
         customer.setEmail(List.of("api@test.com"));
-        response = request.body(customer).when().post("/customers");
+    }
 
+    @Given("cliente com documento igual a {string} e não cadastrado")
+    public void customerNotExist(String document) {
+        customer.setDocument(document);
+    }
+
+    @Given("cliente já estiver cadastrado")
+    public void registerNewCustomer() {
+        this.httpSession.post("/customers", customer);
+
+        var response = this.httpSession.getResponse();
         response.then().statusCode(201);
         var id = response.jsonPath().getLong("id");
         customer.setId(id);
@@ -53,17 +44,13 @@ public class CustomerStepDefinition {
 
     @When("cadastro o cliente")
     public void registerCustomer() {
-        response = request.body(customer).when().post("/customers");
+        this.httpSession.post("/customers", customer);
     }
 
     @When("cadastro o cliente sem informar o nome")
     public void registerCustomerWithoutName() {
-        customer = new CustomerDto();
-        customer.setDocument(RandomStringUtils.randomNumeric(11));
-        customer.setBirthDate(LocalDate.now());
-        customer.setTelephone(List.of("111111111"));
-        customer.setEmail(List.of("api@test.com"));
-        response = request.body(customer).when().post("/customers");
+        customer.setName(null);
+        this.httpSession.post("/customers", customer);
     }
 
     @When("cadastro o cliente sem informar o document")
@@ -78,9 +65,9 @@ public class CustomerStepDefinition {
 
     @Then("encontro o cliente cadastrado")
     public void searchCustomer() {
-        var response = request.when().get("/customers?name=" + customer.getName());
-        response.then().statusCode(200);
-        var name = response.jsonPath().get("[0].name");
+        this.httpSession.get("/customers?name=" + customer.getName());
+        this.httpSession.getResponse().then().statusCode(200);
+        var name = this.httpSession.getResponse().jsonPath().get("[0].name");
         Assertions.assertEquals(customer.getName(), name);
     }
 
@@ -92,11 +79,6 @@ public class CustomerStepDefinition {
     @Then("deve retornar o cliente dentro da lista")
     public void checkIfCustomerIsPresent() {
 
-    }
-
-    @And("a requisição deve ter status igual a {int}")
-    public void checkStatusInResponse(Integer status) {
-        response.then().statusCode(status);
     }
 
 }
