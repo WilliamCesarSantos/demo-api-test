@@ -58,7 +58,7 @@ public class ProductStepDefinition {
     }
 
     @Then("product with barcode was found")
-    public void foundProduct(){
+    public void foundProduct() {
         var id = response.jsonPath().getLong("[0].id");
         Assertions.assertEquals(product.getId(), id);
     }

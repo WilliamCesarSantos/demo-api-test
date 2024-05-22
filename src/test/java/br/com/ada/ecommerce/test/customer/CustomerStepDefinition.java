@@ -1,8 +1,11 @@
 package br.com.ada.ecommerce.test.customer;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -16,6 +19,12 @@ public class CustomerStepDefinition {
     private CustomerDto customer = null;
     protected RequestSpecification request;
     protected Response response;
+
+    public CustomerStepDefinition() {
+        request = RestAssured.given()
+                .baseUri("http://localhost:8080")
+                .contentType(ContentType.JSON);
+    }
 
     @Given("cliente com documento igual a {string} e não cadastrado")
     public void customerNotExist(String document) {
@@ -83,6 +92,11 @@ public class CustomerStepDefinition {
     @Then("deve retornar o cliente dentro da lista")
     public void checkIfCustomerIsPresent() {
 
+    }
+
+    @And("a requisição deve ter status igual a {int}")
+    public void checkStatusInResponse(Integer status) {
+        response.then().statusCode(status);
     }
 
 }
